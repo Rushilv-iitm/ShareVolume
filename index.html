@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+
+<body>
+    <h1></h1>
+    <p>Max Shares:</p>
+    <p id="share-max-value"></p>
+    <p id="share-max-fy"></p>
+    <p>Min Shares:</p>
+    <p id="share-min-value"></p>
+    <p id="share-min-fy"></p>
+</body>
+
+</html>
+
+<script>
+    fetch('https://data.sec.gov/api/xbrl/companyconcept/CIK0001035443/dei/EntityCommonStockSharesOutstanding.json', {
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const entityName = data.entityName;
+
+        const shares = data.units.shares.filter(share => parseInt(share.fy) > 2020 && typeof share.val === 'number');
+        const maxShare = shares.reduce((max, curr) => max.val > curr.val ? max : curr);
+        const minShare = shares.reduce((min, curr) => min.val < curr.val ? min : curr);
+
+        document.title = entityName;
+        document.querySelector('h1').textContent = entityName;
+        document.getElementById('share-entity-name').textContent = entityName;
+        document.getElementById('share-max-value').textContent = `Value: ${maxShare.val}`;
+        document.getElementById('share-max-fy').textContent = `FY: ${maxShare.fy}`;
+        document.getElementById('share-min-value').textContent = `Value: ${minShare.val}`;
+        document.getElementById('share-min-fy').textContent = `FY: ${minShare.fy}`;
+    });
+</script>
